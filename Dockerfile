@@ -15,10 +15,13 @@ ARG DST_USER_DATA_PATH=/data
 # install packages
 RUN dpkg --add-architecture i386 \
     && apt-get update -y \
-    && apt-get install -y --no-install-recommends ca-certificates lib32gcc1 lib32stdc++6 libcurl3-gnutls:i386 wget tar supervisor \
+    && apt-get install -y --no-install-recommends ca-certificates lib32gcc1 lib32stdc++6 libcurl3-gnutls:i386 wget curl net-tools vim tar supervisor \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
+
+# change apt sources
+RUN sed -i s/deb.debian.org/mirrors.cloud.tencent.com/g /etc/apt/sources.list
 
     # create data directory
 RUN mkdir -p "${DST_USER_DATA_PATH}" \
@@ -52,6 +55,9 @@ RUN mkdir -p /opt/dst_server \
 # install default config
 COPY dst_default_config /opt/dst_default_config/
 RUN chown -R "${DST_USER}:${DST_GROUP}" /opt/dst_default_config
+
+# get workshop items from steam
+# RUN /usr/local/bin/get_most_use_workshop_item.sh
 
 # pass essential environment variables into the container
 ENV STEAMCMD_PATH=$STEAMCMD_PATH

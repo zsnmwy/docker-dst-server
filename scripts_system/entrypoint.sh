@@ -1,6 +1,19 @@
 #!/bin/bash
 set -Eeuo pipefail
 
+# fix network error in china
+
+cat <<EOF >> /etc/hosts
+117.28.245.88 motd.klei.com
+117.28.245.88 login.kleientertainment.com
+117.28.245.88 items.kleientertainment.com
+117.28.245.88 dst.metrics.klei.com
+117.28.245.88 lobby-china.kleientertainment.com
+117.28.245.88 login-sing.kleientertainment.com
+117.28.245.88 logincn.kleientertainment.com
+117.28.245.88 d2fr86khx60an2.cloudfront.net
+EOF
+
 DIR_MODS_SYS="/opt/dst_server/mods"
 DIR_MODS_USER="${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods"
 FILE_CLUSTER_TOKEN="${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/cluster_token.txt"
@@ -16,7 +29,7 @@ if [ "$1" == "dontstarve_dedicated_server_nullrenderer" ] || [ "$1" == "supervis
     # create a default server config if there is none
     if [ ! -d "${DST_USER_DATA_PATH}/DoNotStarveTogether" ]; then
         echo "Creating default server config..."
-	mkdir -p "${DST_USER_DATA_PATH}"
+	      mkdir -p "${DST_USER_DATA_PATH}"
         cp -r /opt/dst_default_config/* "${DST_USER_DATA_PATH}"
         touch "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/cluster_token.txt"
     fi
@@ -47,7 +60,7 @@ if [ "$1" == "dontstarve_dedicated_server_nullrenderer" ] || [ "$1" == "supervis
     # if the mods dir is already a symlink, then we temporary remove it to protect it, so that it survives a container restart
     if [[ -L "${DIR_MODS_SYS}" ]]; then
     	rm -f "${DIR_MODS_SYS}"
-	cp -r /opt/dst_default_config/DoNotStarveTogether/Cluster_1/mods "${DIR_MODS_SYS}"
+	    cp -r /opt/dst_default_config/DoNotStarveTogether/Cluster_1/mods "${DIR_MODS_SYS}"
     fi
 
     # Update game
