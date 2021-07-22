@@ -28,6 +28,13 @@ trap 'on_error ${LINENO} $?' ERR 2>/dev/null || true # some shells don't have ER
 
 if [ "$1" == "dontstarve_dedicated_server_nullrenderer" ] || [ "$1" == "supervisord" ]; then
 
+    # Create Mods Dir For New Saves
+    if [ ! -f "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/dedicated_server_mods_setup.lua" ]; then
+        mkdir -p "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods"
+        touch "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/dedicated_server_mods_setup.lua"
+        touch "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/modsettings.lua"
+    fi
+
     # fetch mod id from Master configs and fill in dedicated_server_mods_setup.lua
     if [ -f "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master/modoverrides.lua" ]; then
         # shellcheck disable=SC2002
