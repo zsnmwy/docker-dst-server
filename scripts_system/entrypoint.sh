@@ -26,6 +26,13 @@ on_error() {
 trap 'on_error ${LINENO} $?' ERR 2>/dev/null || true # some shells don't have ERR trap.
 
 if [ "$1" == "dontstarve_dedicated_server_nullrenderer" ] || [ "$1" == "supervisord" ]; then
+
+    # fetch mod id from Master configs and fill in dedicated_server_mods_setup.lua
+    if [ -f "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master/modoverrides.lua" ]; then
+        # shellcheck disable=SC2002
+        cat "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master/modoverrides.lua" | grep -o 'workshop-.*' | cut -d '"' -f1 | cut -d '-' -f2 | sed 's/^/ServerModSetup("&/g' | sed 's/$/&")/g' > "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/dedicated_server_mods_setup.lua"
+    fi
+
     # create a default server config if there is none
     if [ ! -d "${DST_USER_DATA_PATH}/DoNotStarveTogether" ]; then
         echo "Creating default server config..."
