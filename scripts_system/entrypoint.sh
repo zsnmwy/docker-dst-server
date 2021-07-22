@@ -12,6 +12,7 @@ cat <<EOF >> /etc/hosts
 117.28.245.88 login-sing.kleientertainment.com
 117.28.245.88 logincn.kleientertainment.com
 117.28.245.88 d2fr86khx60an2.cloudfront.net
+223.119.248.16 steamusercontent-a.akamaihd.net
 EOF
 
 DIR_MODS_SYS="/opt/dst_server/mods"
