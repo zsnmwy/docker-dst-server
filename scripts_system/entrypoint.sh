@@ -30,7 +30,7 @@ if [ "$1" == "dontstarve_dedicated_server_nullrenderer" ] || [ "$1" == "supervis
     # fetch mod id from Master configs and fill in dedicated_server_mods_setup.lua
     if [ -f "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master/modoverrides.lua" ]; then
         # shellcheck disable=SC2002
-        cat "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master/modoverrides.lua" | grep -o 'workshop-.*' | cut -d '"' -f1 | cut -d '-' -f2 | sed 's/^/ServerModSetup("&/g' | sed 's/$/&")/g' > "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/dedicated_server_mods_setup.lua"
+        cat "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master/modoverrides.lua" | grep -v 'MemSpikeFixworkshop' | grep -o 'workshop-.*' | cut -d '"' -f1 | cut -d '-' -f2 | sed 's/^/ServerModSetup("&/g' | sed 's/$/&")/g' > "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/dedicated_server_mods_setup.lua"
     fi
 
     # create a default server config if there is none
