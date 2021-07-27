@@ -29,30 +29,27 @@ trap 'on_error ${LINENO} $?' ERR 2>/dev/null || true # some shells don't have ER
 if [ "$1" == "dontstarve_dedicated_server_nullrenderer" ] || [ "$1" == "supervisord" ]; then
 
     # Create Mods Dir For New Saves
-    if [ ! -f "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/dedicated_server_mods_setup.lua" ]; then
-        mkdir -p "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods"
-        touch "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/dedicated_server_mods_setup.lua"
-        touch "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/modsettings.lua"
+    if [ ! -d "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master" ]; then
+        mkdir -p "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/"
+        cp -r /opt/dst_default_config/DoNotStarveTogether/Cluster_1/* "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/"
     fi
 
     # fetch mod id from Master configs and fill in dedicated_server_mods_setup.lua
     if [ -f "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master/modoverrides.lua" ]; then
         # shellcheck disable=SC2002
-        cat "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master/modoverrides.lua" | grep -v 'MemSpikeFixworkshop' | grep -o 'workshop-.*' | cut -d '"' -f1 | cut -d '-' -f2 | sed 's/^/ServerModSetup("&/g' | sed 's/$/&")/g' > "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/mods/dedicated_server_mods_setup.lua"
+        cat "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/Master/modoverrides.lua" | grep -v 'MemSpikeFixworkshop' | grep -o 'workshop-.*' | cut -d '"' -f1 | cut -d '-' -f2 | sed 's/^/ServerModSetup("&/g' | sed 's/$/&")/g' > /opt/dst_server/mods/dedicated_server_mods_setup.lua
     fi
 
-    # create a default server config if there is none
-    if [ ! -d "${DST_USER_DATA_PATH}/DoNotStarveTogether" ]; then
-        echo "Creating default server config..."
-	      mkdir -p "${DST_USER_DATA_PATH}"
-        cp -r /opt/dst_default_config/* "${DST_USER_DATA_PATH}"
+    # create a default server cluster_token if there is none
+    if [ ! -f "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/cluster_token.txt" ]; then
+        echo "Creating default server cluster_token..."
         touch "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1/cluster_token.txt"
     fi
 
     # fill cluster token from environment variable
     if [ ! -z "${DST_CLUSTER_TOKEN:-}" ]; then
-	echo "Filling cluster token from environment variable"
-	printf "%s" "${DST_CLUSTER_TOKEN}" > "${FILE_CLUSTER_TOKEN}"
+        echo "Filling cluster token from environment variable"
+        printf "%s" "${DST_CLUSTER_TOKEN}" > "${FILE_CLUSTER_TOKEN}"
     fi
 
     # check cluster token file format
@@ -73,10 +70,10 @@ if [ "$1" == "dontstarve_dedicated_server_nullrenderer" ] || [ "$1" == "supervis
 
     # protect our mods dir
     # if the mods dir is already a symlink, then we temporary remove it to protect it, so that it survives a container restart
-    if [[ -L "${DIR_MODS_SYS}" ]]; then
-    	rm -f "${DIR_MODS_SYS}"
-	    cp -r /opt/dst_default_config/DoNotStarveTogether/Cluster_1/mods "${DIR_MODS_SYS}"
-    fi
+#    if [[ -L "${DIR_MODS_SYS}" ]]; then
+#    	rm -f "${DIR_MODS_SYS}"
+#	    cp -r /opt/dst_default_config/DoNotStarveTogether/Cluster_1/mods "${DIR_MODS_SYS}"
+#    fi
 
     # Update game
     # note that the update process modifies (resets) the mods folder so we symlink that later
@@ -84,19 +81,19 @@ if [ "$1" == "dontstarve_dedicated_server_nullrenderer" ] || [ "$1" == "supervis
     steamcmd +runscript /opt/steamcmd_scripts/install_dst_server
 
     # if there are no mods config, use the one that comes with the server
-    if [ ! -d "${DIR_MODS_USER}" ]; then
-        echo "Creating default mod config..."
-        mkdir -p "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1"
-        cp -r "${DIR_MODS_SYS}" "${DIR_MODS_USER}"
-    fi
+#    if [ ! -d "${DIR_MODS_USER}" ]; then
+#        echo "Creating default mod config..."
+#        mkdir -p "${DST_USER_DATA_PATH}/DoNotStarveTogether/Cluster_1"
+#        cp -r "${DIR_MODS_SYS}" "${DIR_MODS_USER}"
+#    fi
 
     # override server mods folder with the user provided one
-    rm -rf "${DIR_MODS_SYS}"
-    ln -s "${DIR_MODS_USER}" "${DIR_MODS_SYS}"
+#    rm -rf "${DIR_MODS_SYS}"
+#    ln -s "${DIR_MODS_USER}" "${DIR_MODS_SYS}"
 
     # update mods
     echo "Updating mods..."
-    su --login --group "${DST_GROUP}" -c "dontstarve_dedicated_server_nullrenderer -persistent_storage_root \"${DST_USER_DATA_PATH}\" -ugc_directory \"${DST_USER_DATA_PATH}\"/ugc -only_update_server_mods" "${DST_USER}"
+    su --login --group "${DST_GROUP}" -c "dontstarve_dedicated_server_nullrenderer -persistent_storage_root \"${DST_USER_DATA_PATH}\" -ugc_directory \"${DST_USER_DATA_PATH}\"/ugc_mods -only_update_server_mods" "${DST_USER}"
 
     # remove any existing supervisor socket
     rm -f /var/run/supervisor.sock
